@@ -9,6 +9,8 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
+import { updateInvoice, State } from '@/app/lib/actions';
+import { useActionState } from 'react';
 
 export default function EditInvoiceForm({
   invoice,
@@ -17,8 +19,13 @@ export default function EditInvoiceForm({
   invoice: InvoiceForm;
   customers: CustomerField[];
 }) {
+  const initialState: State = { message: null, errors: {} };
+  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
+  const [state, formAction] = useActionState(updateInvoiceWithId, initialState);
+
   return (
-    <form>
+    // ✅ 폼 action에 바운드된 서버 액션을 지정
+    <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -28,7 +35,7 @@ export default function EditInvoiceForm({
           <div className="relative">
             <select
               id="customer"
-              name="customerId"
+              name="customerId"  // ← 서버 액션에서 formData.get('customerId')로 받음
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               defaultValue={invoice.customer_id}
             >
@@ -54,7 +61,7 @@ export default function EditInvoiceForm({
             <div className="relative">
               <input
                 id="amount"
-                name="amount"
+                name="amount"     // ← formData.get('amount')
                 type="number"
                 step="0.01"
                 defaultValue={invoice.amount}
@@ -76,7 +83,7 @@ export default function EditInvoiceForm({
               <div className="flex items-center">
                 <input
                   id="pending"
-                  name="status"
+                  name="status"     // ← formData.get('status')
                   type="radio"
                   value="pending"
                   defaultChecked={invoice.status === 'pending'}
@@ -109,6 +116,7 @@ export default function EditInvoiceForm({
           </div>
         </fieldset>
       </div>
+
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/invoices"
